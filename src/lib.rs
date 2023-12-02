@@ -1,8 +1,9 @@
 use std::fs;
 use std::io;
 use std::error::Error;
-use walkdir::WalkDir;
 use std::collections::HashSet;
+use std::process::Command;
+use walkdir::WalkDir;
 
 
 fn find_files(query: &str, path: &String) {
@@ -10,7 +11,7 @@ fn find_files(query: &str, path: &String) {
     let mut file_num: u8 = 0;
     for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
         let file = entry.path().display();
-        let filename = entry.file_name().to_string_lossy().into_owned();
+        let filename = entry.path().to_string_lossy().into_owned();
         match fs::read_to_string(entry.path()) {
             Ok(contents) => {
                 for line in search(&query, &contents) {
@@ -42,7 +43,14 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
                 continue;
             }
         };
+        if v.len() <= requested_num {
+            println!("Invalid number");
+            continue;
+        }
         println!("file is {}", v[requested_num]);
+        let status = Command::new("open")
+            .arg(&v[requested_num])
+            .status();
         break Ok(());
     }
 }
