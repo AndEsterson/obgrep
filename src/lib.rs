@@ -86,11 +86,10 @@ impl Config {
     }
 }
 
-fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+fn search<'a>(query: &String, contents: &'a str) -> Vec<&'a str> {
     let mut results = Vec::new();
-
     for line in contents.lines() {
-        if line.contains(query) {
+        if line.to_lowercase().contains(&query.to_lowercase()) {
             results.push(line);
         }
     }
