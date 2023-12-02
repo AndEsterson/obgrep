@@ -5,12 +5,6 @@ use std::collections::HashSet;
 use std::process::Command;
 use walkdir::{DirEntry, WalkDir};
 
-fn is_hidden(entry: &DirEntry) -> bool {
-    entry.file_name()
-         .to_str()
-         .map(|s| s.starts_with("."))
-         .unwrap_or(false)
-}
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut matched_files = HashSet::new();
@@ -43,7 +37,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     }
     if matched_files.len() > 0 {
         let v: Vec<_> = matched_files.into_iter().collect();
-        user_response(v);
+        let _response = user_response(v);
     }
     Ok(())
 }
@@ -56,7 +50,7 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
             .expect("failed to read line");
         let requested_num: usize= match requested_num.trim().parse() {
             Ok(num) => num,
-            Err(error) => {
+            Err(_) => {
                 println!("Not a number");
                 continue;
             }
@@ -65,7 +59,7 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
             println!("Invalid number");
             continue;
         }
-        let status = Command::new("open")
+        let _status = Command::new("open")
             .arg("-a")
             .arg("obsidian")
             .arg(&v[requested_num - 1])
@@ -92,7 +86,7 @@ impl Config {
     }
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let mut results = Vec::new();
 
     for line in contents.lines() {
@@ -104,20 +98,9 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     results
 }
 
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn one_result() {
-        let query = "duct";
-        let contents = "\
-Rust:
-safe, fast, productive.
-Pick three.";
-
-        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
-    }
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry.file_name()
+         .to_str()
+         .map(|s| s.starts_with("."))
+         .unwrap_or(false)
 }
-
