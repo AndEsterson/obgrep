@@ -15,9 +15,11 @@ fn find_files(query: &str, path: &String) {
         match fs::read_to_string(entry.path()) {
             Ok(contents) => {
                 for line in search(&query, &contents) {
+                    if !matched_files.contains(&filename) {
+                        file_num += 1
+                    };
                     matched_files.insert(filename.clone());
                     println!("({0}) {file}: {line}", file_num.to_string());
-                    file_num += 1
                 }
             }
             Err(_) => {
@@ -43,13 +45,13 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
                 continue;
             }
         };
-        if v.len() <= requested_num {
+        if v.len() < requested_num {
             println!("Invalid number");
             continue;
         }
-        println!("file is {}", v[requested_num]);
+        println!("file is {}", v[requested_num - 1]);
         let status = Command::new("open")
-            .arg(&v[requested_num])
+            .arg(&v[requested_num - 1])
             .status();
         break Ok(());
     }
