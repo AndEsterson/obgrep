@@ -12,10 +12,10 @@ fn is_hidden(entry: &DirEntry) -> bool {
          .unwrap_or(false)
 }
 
-fn find_files(query: &str, path: &String) {
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut matched_files = HashSet::new();
     let mut file_num: u8 = 0;
-    let walker = WalkDir::new(path).into_iter();
+    let walker = WalkDir::new(&config.file_path).into_iter();
     for result in walker.filter_entry(|e| !is_hidden(e)) {
         match result {
             Ok(entry) => {
@@ -23,7 +23,7 @@ fn find_files(query: &str, path: &String) {
                 let filename = entry.path().to_string_lossy().into_owned();
                 match fs::read_to_string(entry.path()) {
                     Ok(contents) => {
-                        for line in search(&query, &contents) {
+                        for line in search(&config.query, &contents) {
                             if !matched_files.contains(&filename) {
                                 file_num += 1
                             };
@@ -36,14 +36,16 @@ fn find_files(query: &str, path: &String) {
                     }
                 }
             }
-            Err(err) => {
-                // Handle the error, e.g., print or log it
-                eprintln!("Error reading directory entry: {}", err);
+            Err(_) => {
+                continue;
             }
         }
     }
-    let v: Vec<_> = matched_files.into_iter().collect();
-    user_response(v);
+    if matched_files.len() > 0 {
+        let v: Vec<_> = matched_files.into_iter().collect();
+        user_response(v);
+    }
+    Ok(())
 }
 
 fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
@@ -70,11 +72,6 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
             .status();
         break Ok(());
     }
-}
-
-pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    find_files(&config.query, &config.file_path);
-    Ok(())
 }
 
 pub struct Config {
