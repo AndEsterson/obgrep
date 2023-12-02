@@ -27,7 +27,6 @@ fn find_files(query: &str, path: &String) {
             }
         }
     }
-    println!("{} matches", matched_files.len());
     let v: Vec<_> = matched_files.into_iter().collect();
     user_response(v);
 }
@@ -41,7 +40,7 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
         let requested_num: usize= match requested_num.trim().parse() {
             Ok(num) => num,
             Err(error) => {
-                println!("Invalid number");
+                println!("Not a number");
                 continue;
             }
         };
@@ -49,8 +48,9 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
             println!("Invalid number");
             continue;
         }
-        println!("file is {}", v[requested_num - 1]);
         let status = Command::new("open")
+            .arg("-a")
+            .arg("obsidian")
             .arg(&v[requested_num - 1])
             .status();
         break Ok(());
