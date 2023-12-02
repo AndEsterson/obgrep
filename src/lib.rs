@@ -13,7 +13,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     for result in walker.filter_entry(|e| !is_hidden(e)) {
         match result {
             Ok(entry) => {
-                let file = entry.path().display();
+                let file = entry.file_name().to_string_lossy();
                 let filename = entry.path().to_string_lossy().into_owned();
                 match fs::read_to_string(entry.path()) {
                     Ok(contents) => {
@@ -78,7 +78,7 @@ impl Config {
         if args.len() < 3 {
             return Err("not enough arguments");
         }
-        
+
         let file_path = args[1].clone();
         let query = args[2].clone();
 
