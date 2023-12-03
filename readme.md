@@ -1,6 +1,6 @@
 # Obgrep
 
-Obgrep is a simple command line tool, it works a lot like `grep -r` but provides a list of matches with numbers corresponding to each file, entering that number then opens the file in Obsidian, intendedas an in terminal way of searching Obsidian notes
+Obgrep is a simple command line tool (currently just for macOS), it works a lot like `grep -r` but provides a list of matches with numbers corresponding to each file, entering that number then opens the file in Obsidian, intendedas an in terminal way of searching Obsidian notes
 
 # Usage
 
