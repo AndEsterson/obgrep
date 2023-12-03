@@ -18,4 +18,4 @@ obgrep ~/personal_notes multiple
 entering 1 or 2 would then open `testing note.md` or `testing note 2.md` respectively in Obsidian (the idea is that the folder you're searching will mostly correspond to an Obsidian vault)
 
 # Setup
-The source code here needs to be compiled into a binary by running `cargo build --release` (or if you prefer you could download the released binary, either way for the sake of safety you should quickly take a look at the source code), you might then want to move `obgrep` (`./target/release/obgrep`) to somewhere in your path, or extend your path to include it. After doing that you can happily remove the repo if you like.
+The source code here needs to be compiled into a binary by running `cargo build --release` (or if you prefer you could download the released binary, but reading the source code and compiling yourself is always safest), you might then want to move `obgrep` (`./target/release/obgrep`) to somewhere in your path, or extend your path to include it. After doing that you can happily remove the repo if you like.
