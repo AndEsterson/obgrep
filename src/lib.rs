@@ -59,7 +59,6 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
             println!("Invalid number");
             continue;
         }
-        println!("obsidian://{}", &v[requested_num - 1]);
         let _status = Command::new("open")
             .arg("-a")
             .arg("obsidian")
