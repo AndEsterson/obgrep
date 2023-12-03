@@ -6,6 +6,7 @@ version = 3
 name = "obgrep"
 version = "0.1.0"
 dependencies = [
+ "urlencoding",
  "walkdir",
 ]
 
@@ -17,6 +18,12 @@ checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
 ]
+
+[[package]]
+name = "urlencoding"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "walkdir"

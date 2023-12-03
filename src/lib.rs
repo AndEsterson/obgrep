@@ -4,7 +4,7 @@ use std::error::Error;
 use std::collections::HashSet;
 use std::process::Command;
 use walkdir::{DirEntry, WalkDir};
-
+use urlencoding::encode;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut matched_files = HashSet::new();
@@ -13,16 +13,16 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     for result in walker.filter_entry(|e| !is_hidden(e)) {
         match result {
             Ok(entry) => {
-                let file = entry.file_name().to_string_lossy();
-                let filename = entry.path().to_string_lossy().into_owned();
+                let filename = entry.file_name().to_string_lossy();
+                let file = entry.path().to_string_lossy().into_owned();
                 match fs::read_to_string(entry.path()) {
                     Ok(contents) => {
                         for line in search(&config.query, &contents) {
-                            if !matched_files.contains(&filename) {
+                            if !matched_files.contains(&file) {
                                 file_num += 1
                             };
-                            matched_files.insert(filename.clone());
-                            println!("({0}) {file}: {line}", file_num.to_string());
+                            matched_files.insert(file.clone());
+                            println!("({0}) {filename}: {line}", file_num.to_string());
                         }
                     }
                     Err(_) => {
@@ -59,10 +59,11 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
             println!("Invalid number");
             continue;
         }
+        println!("obsidian://{}", &v[requested_num - 1]);
         let _status = Command::new("open")
             .arg("-a")
             .arg("obsidian")
-            .arg(&v[requested_num - 1])
+            .arg(format!("obsidian://open?path={}", encode(&v[requested_num - 1])))
             .status();
         break Ok(());
     }
