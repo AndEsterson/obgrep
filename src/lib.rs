@@ -1,13 +1,12 @@
 use std::fs;
 use std::io;
 use std::error::Error;
-use std::collections::HashSet;
 use std::process::Command;
 use walkdir::{DirEntry, WalkDir};
 use urlencoding::encode;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let mut matched_files = HashSet::new();
+    let mut matched_files = Vec::<String>::new();
     let mut file_num: u8 = 0;
     let walker = WalkDir::new(&config.file_path).into_iter();
     for result in walker.filter_entry(|e| !is_hidden(e)) {
@@ -19,9 +18,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
                     Ok(contents) => {
                         for line in search(&config.query, &contents) {
                             if !matched_files.contains(&file) {
-                                file_num += 1
+                                file_num += 1;
+                                matched_files.push(file.clone())
                             };
-                            matched_files.insert(file.clone());
                             println!("({0}) {filename}: {line}", file_num.to_string());
                         }
                     }
@@ -36,8 +35,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         }
     }
     if matched_files.len() > 0 {
-        let v: Vec<_> = matched_files.into_iter().collect();
-        let _response = user_response(v);
+        let _response = user_response(matched_files);
     }
     Ok(())
 }
@@ -55,7 +53,7 @@ fn user_response(v: Vec<String>) -> Result<(), Box<dyn Error>> {
                 continue;
             }
         };
-        if v.len() < requested_num {
+        if v.len() < requested_num || requested_num == 0 {
             println!("Invalid number");
             continue;
         }
