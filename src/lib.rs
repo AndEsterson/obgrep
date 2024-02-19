@@ -3,12 +3,14 @@ use std::io;
 use std::error::Error;
 use std::process::Command;
 use walkdir::{DirEntry, WalkDir};
+use aho_corasick::AhoCorasick;
 use urlencoding::encode;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut matched_files = Vec::<String>::new();
     let mut file_num: u8 = 0;
     let walker = WalkDir::new(&config.file_path).into_iter();
+    let ac = AhoCorasick::new(patterns).unwrap();
     for result in walker.filter_entry(|e| !is_hidden(e)) {
         match result {
             Ok(entry) => {
