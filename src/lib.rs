@@ -41,7 +41,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
                 }
         }
     }
-    matches.sort_by_key(|&(ref s, _, _)| s.clone());
+    matches.sort_by_key(|(s, _, _)| s.clone());
     let mut matched_files: Vec<&String> = vec![];
     let mut count = 0;
     for matched in &matches {
@@ -55,7 +55,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             count += 1;
         }
     }
-    if matches.len() > 0 {
+    if !matches.is_empty() {
         let _response = user_response(matched_files);
     }
     Ok(())
@@ -81,7 +81,7 @@ fn user_response(matched_files: Vec<&String>) -> Result<(), Box<dyn Error>> {
         let _status = Command::new("open")
             .arg("-a")
             .arg("obsidian")
-            .arg(format!("obsidian://open?path={}", encode(&matched_files[requested_num])))
+            .arg(format!("obsidian://open?path={}", encode(matched_files[requested_num])))
             .status();
         break Ok(());
     }
