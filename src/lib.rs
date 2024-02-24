@@ -1,6 +1,8 @@
 use std::io;
 use std::error::Error;
 use std::process::Command;
+use urlencoding::encode;
+use colored::Colorize;
 use {
     grep::{
         regex::RegexMatcher,
@@ -8,7 +10,7 @@ use {
     },
     walkdir::WalkDir,
 };
-use urlencoding::encode;
+
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut matches: Vec<(String, u64, String)> = vec![];
@@ -48,8 +50,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         let filename = &matched.0;
         println!("({}) {}: {}",
             count,
-            matched.0,
-            matched.2);
+            matched.0.red(),
+            matched.2.trim());
         if !matched_files.contains(&filename) {
             matched_files.push(filename);
             count += 1;
