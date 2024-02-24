@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
 
 rust-latest:
   stage: build
@@ -14,4 +15,11 @@ rust-nightly:
   script:
     - cargo build --verbose
     - cargo test --verbose
+  allow_failure: true
+
+rust-latest-test:
+  stage: test
+  image: rust:latest
+  script:
+   - cargo clippy
   allow_failure: true
