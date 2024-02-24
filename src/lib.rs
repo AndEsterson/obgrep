@@ -1,14 +1,13 @@
-use std::io;
-use std::error::Error;
-use std::process::Command;
-use urlencoding::encode;
 use colored::Colorize;
 use grep::{
-        regex::RegexMatcher,
-        searcher::{BinaryDetection, SearcherBuilder, sinks::UTF8},
-    };
-use walkdir::{WalkDir, DirEntry};
-
+    regex::RegexMatcher,
+    searcher::{sinks::UTF8, BinaryDetection, SearcherBuilder},
+};
+use std::error::Error;
+use std::io;
+use std::process::Command;
+use urlencoding::encode;
+use walkdir::{DirEntry, WalkDir};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut matches: Vec<(String, u64, String)> = vec![];
@@ -18,9 +17,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         .line_number(true)
         .build();
     for entry in WalkDir::new(&config.file_path)
-                .into_iter()
-                .filter_entry(is_not_dotfile)
-                .filter_map(|v| v.ok()) {
+        .into_iter()
+        .filter_entry(is_not_dotfile)
+        .filter_map(|v| v.ok())
+    {
         if !entry.file_type().is_file() {
             continue;
         }
@@ -28,10 +28,14 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             &matcher,
             entry.path(),
             UTF8(|lnum, line| {
-                matches.push((entry.path().to_string_lossy().into_owned(), lnum, line.to_string()));
+                matches.push((
+                    entry.path().to_string_lossy().into_owned(),
+                    lnum,
+                    line.to_string(),
+                ));
                 Ok(true)
-            }
-        ));
+            }),
+        );
         if let Err(err) = result {
             eprintln!("{}: {}", entry.path().display(), err);
         }
@@ -41,10 +45,12 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut count: u8 = 0;
     for matched in &matches {
         let filename = &matched.0;
-        println!("{}){}: {}",
+        println!(
+            "{}){}: {}",
             count.to_string().yellow(),
             matched.0.purple(),
-            matched.2.trim());
+            matched.2.trim()
+        );
         if !matched_files.contains(&filename) {
             matched_files.push(filename);
             count += 1;
@@ -57,11 +63,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 fn is_not_dotfile(file: &DirEntry) -> bool {
-        file
-         .file_name()
-         .to_str()
-         .map(|s| file.depth() == 0 || !s.starts_with('.'))
-         .unwrap_or(false)
+    file.file_name()
+        .to_str()
+        .map(|s| file.depth() == 0 || !s.starts_with('.'))
+        .unwrap_or(false)
 }
 
 fn user_response(matched_files: Vec<&String>) -> Result<(), Box<dyn Error>> {
@@ -70,7 +75,7 @@ fn user_response(matched_files: Vec<&String>) -> Result<(), Box<dyn Error>> {
         io::stdin()
             .read_line(&mut requested_num)
             .expect("failed to read line");
-        let requested_num: usize= match requested_num.trim().parse() {
+        let requested_num: usize = match requested_num.trim().parse() {
             Ok(num) => num,
             Err(_) => {
                 println!("Not a number");
@@ -84,7 +89,10 @@ fn user_response(matched_files: Vec<&String>) -> Result<(), Box<dyn Error>> {
         let _status = Command::new("open")
             .arg("-a")
             .arg("obsidian")
-            .arg(format!("obsidian://open?path={}", encode(matched_files[requested_num])))
+            .arg(format!(
+                "obsidian://open?path={}",
+                encode(matched_files[requested_num])
+            ))
             .status();
         break Ok(());
     }
@@ -104,8 +112,6 @@ impl Config {
         let file_path = args[1].clone();
         let query = args[2].clone();
 
-
         Ok(Config { query, file_path })
     }
 }
-

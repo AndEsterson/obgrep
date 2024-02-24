@@ -22,4 +22,5 @@ rust-latest-test:
   image: rust:latest
   script:
    - cargo clippy
+   - cargo fmt --all -- --check
   allow_failure: true
