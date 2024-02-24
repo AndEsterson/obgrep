@@ -3,13 +3,11 @@ use std::error::Error;
 use std::process::Command;
 use urlencoding::encode;
 use colored::Colorize;
-use {
-    grep::{
+use grep::{
         regex::RegexMatcher,
         searcher::{BinaryDetection, SearcherBuilder, sinks::UTF8},
-    },
-    walkdir::WalkDir,
-};
+    };
+use walkdir::{WalkDir, DirEntry};
 
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
@@ -19,38 +17,33 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         .binary_detection(BinaryDetection::quit(b'\x00'))
         .line_number(true)
         .build();
-    for result in WalkDir::new(&config.file_path) {
-        match result {
-            Ok(entry) => {
-                if !entry.file_type().is_file() {
-                    continue;
-                }
-                let result = searcher.search_path(
-                    &matcher,
-                    entry.path(),
-                    UTF8(|lnum, line| {
-                        matches.push((entry.path().to_string_lossy().into_owned(), lnum, line.to_string()));
-                        Ok(true)
-                    }
-                ));
-                if let Err(err) = result {
-                    eprintln!("{}: {}", entry.path().display(), err);
-                }
+    for entry in WalkDir::new(&config.file_path)
+                .into_iter()
+                .filter_entry(is_not_dotfile)
+                .filter_map(|v| v.ok()) {
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        let result = searcher.search_path(
+            &matcher,
+            entry.path(),
+            UTF8(|lnum, line| {
+                matches.push((entry.path().to_string_lossy().into_owned(), lnum, line.to_string()));
+                Ok(true)
             }
-            Err(err) => {
-                    eprintln!("error in walking dirs: {}", err);
-                    continue;
-                }
+        ));
+        if let Err(err) = result {
+            eprintln!("{}: {}", entry.path().display(), err);
         }
     }
     matches.sort_by_key(|(s, _, _)| s.clone());
     let mut matched_files: Vec<&String> = vec![];
-    let mut count = 0;
+    let mut count: u8 = 0;
     for matched in &matches {
         let filename = &matched.0;
-        println!("({}) {}: {}",
-            count,
-            matched.0.red(),
+        println!("{}){}: {}",
+            count.to_string().yellow(),
+            matched.0.purple(),
             matched.2.trim());
         if !matched_files.contains(&filename) {
             matched_files.push(filename);
@@ -61,6 +54,14 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         let _response = user_response(matched_files);
     }
     Ok(())
+}
+
+fn is_not_dotfile(file: &DirEntry) -> bool {
+        file
+         .file_name()
+         .to_str()
+         .map(|s| file.depth() == 0 || !s.starts_with('.'))
+         .unwrap_or(false)
 }
 
 fn user_response(matched_files: Vec<&String>) -> Result<(), Box<dyn Error>> {
