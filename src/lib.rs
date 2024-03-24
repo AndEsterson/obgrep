@@ -82,7 +82,7 @@ fn user_response(matched_files: Vec<&String>) -> Result<(), Box<dyn Error>> {
                 continue;
             }
         };
-        if matched_files.len() < requested_num || requested_num == 0 {
+        if (matched_files.len() - 1) < requested_num {
             println!("Invalid number");
             continue;
         }
